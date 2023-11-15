@@ -18,8 +18,8 @@ entre Mongo y MySQL.
 - [X] Eliminar una entrada existente.
 
 ### Tecnologías utilizadas
--VSC
--MySQL Workbench
--Express JS
--Node JS
+- VSC
+- MySQL Workbench
+- Express JS
+- Node JS
 
