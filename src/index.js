@@ -41,7 +41,6 @@ app.get("/books", async (req, res) => {
   let query = "SELECT * FROM books";
 
   //conexión a la db
-
   const conn = await getConnection();
 
   //Ejecutar la consulta
@@ -57,11 +56,50 @@ app.get("/books", async (req, res) => {
   });
 });
 
+//------- NO LO PIDE --------
+
 //obtener un libro por su ID
 app.get("/books/:id", async (req, res) => {
   //obtener el ID (url params)
   const idBooks = req.params.id;
 
+  if (isNaN(parseInt(idBooks))) {
+    res.json({
+      success: false,
+      error: "El id debe ser un número",
+    });
+    return;
+  }
   //select a la db
   let query = "SELECT * FROM books WHERE id = ?";
+
+  //conexión a la db
+  const conn = await getConnection();
+
+  //Ejecutar la consulta
+  const [results] = await conn.query(query, [idBooks]);
+  console.log(results);
+
+  const nunOfElements = results.length;
+
+  if (nunOfElements === 0) {
+    res.json({
+      success: true,
+      message: "No existe ese libro",
+    });
+    return;
+  }
+
+  //Enviar la respuesta
+  res.json({
+    results: results[0],
+  });
+});
+
+//Insertar-añadir nuevo libro
+app.post("books", async (req, res) => {
+  const dataBook = req.body; //Objeto
+  const { title, author, genre, year, synopsis } = dataBook;
+
+  let sql;
 });
