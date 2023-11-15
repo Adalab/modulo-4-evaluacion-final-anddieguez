@@ -103,6 +103,53 @@ app.post("/books", async (req, res) => {
 
   let sql =
     "INSERT INTO `books` (`title`, `author`, `genre`, `year`, `synopsis`) VALUES (?, ?, ?, ?, ?);";
+  try {
+    //conexión a la db
+    const conn = await getConnection();
+
+    //Ejecutar la consulta
+    const [results] = await conn.query(sql, [
+      title,
+      author,
+      genre,
+      year,
+      synopsis,
+    ]);
+
+    //validación si el libro se ha insertado o no
+
+    if (results.affectedRows === 0) {
+      res.json({
+        success: false,
+        message: "El libro no se ha podido insertar, inténtalo de nuevo",
+      });
+    }
+
+    res.json({
+      success: true,
+      id: results.insertId, //id que generó MYSQL para la nueva fila
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: `Upps, ha ocurrido un error ${error}`,
+    });
+  }
+});
+
+//Actualizar libros
+//POST sirve para insertar y para actualizar (todo lo que sea enviar datos)
+//PUT sirve para actualizar
+
+app.put("/books/:id", async (req, res) => {
+  //Obtener los valores del req.body
+  const dataBook = req.body; //Objeto
+  const { title, author, genre, year, synopsis } = dataBook;
+  //Obtener el id del req.params
+  const idBooks = req.params.id;
+
+  let sql =
+    "UPDATE `books` SET title=?, author=?, genre=?, year=?, synopsis=? WHERE id = ?";
 
   //conexión a la db
   const conn = await getConnection();
@@ -114,10 +161,57 @@ app.post("/books", async (req, res) => {
     genre,
     year,
     synopsis,
+    idBooks,
   ]);
-
   res.json({
     success: true,
-    id: results.insertId, //id que generó MYSQL para la nueva fila
+    message: "Se ha actualizado correctamente",
   });
 });
+
+//Eliminar un libro DELETE
+
+app.delete("/books/:id", async (req, res) => {
+  //Obtener el id del req.params
+  const idBooks = req.params.id;
+
+  let sql = "DELETE FROM books WHERE id = ?";
+
+  //conexión a la db
+  const conn = await getConnection();
+
+  //Ejecutar la consulta
+  const [results] = await conn.query(sql, [idBooks]);
+  res.json({
+    success: true,
+    message: "Se ha eliminado correctamente",
+  });
+});
+
+/*
+app.delete("/books/:id", async (req, res) => {
+  //Obtener el id del req.params
+  const idBooks = req.params.id;
+
+  //VALIDACION
+  if (idBooks !== "") {
+    res.json({
+      success: false,
+      message: "No existe el libro que buscas, no se puede eliminar",
+    });
+    return;
+  } else {
+    let sql = "DELETE FROM books WHERE id = ?";
+
+    //conexión a la db
+    const conn = await getConnection();
+
+    //Ejecutar la consulta
+    const [results] = await conn.query(sql, [idBooks]);
+    res.json({
+      success: true,
+      message: "Se ha eliminado correctamente",
+    });
+  }
+});
+*/
