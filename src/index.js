@@ -56,8 +56,6 @@ app.get("/books", async (req, res) => {
   });
 });
 
-//------- NO LO PIDE --------
-
 //obtener un libro por su ID
 app.get("/books/:id", async (req, res) => {
   //obtener el ID (url params)
@@ -123,6 +121,7 @@ app.post("/books", async (req, res) => {
         success: false,
         message: "El libro no se ha podido insertar, inténtalo de nuevo",
       });
+      return;
     }
 
     res.json({
@@ -177,41 +176,33 @@ app.delete("/books/:id", async (req, res) => {
 
   let sql = "DELETE FROM books WHERE id = ?";
 
-  //conexión a la db
-  const conn = await getConnection();
-
-  //Ejecutar la consulta
-  const [results] = await conn.query(sql, [idBooks]);
-  res.json({
-    success: true,
-    message: "Se ha eliminado correctamente",
-  });
-});
-
-/*
-app.delete("/books/:id", async (req, res) => {
-  //Obtener el id del req.params
-  const idBooks = req.params.id;
-
-  //VALIDACION
-  if (idBooks !== "") {
-    res.json({
-      success: false,
-      message: "No existe el libro que buscas, no se puede eliminar",
-    });
-    return;
-  } else {
-    let sql = "DELETE FROM books WHERE id = ?";
-
+  try {
     //conexión a la db
     const conn = await getConnection();
 
     //Ejecutar la consulta
     const [results] = await conn.query(sql, [idBooks]);
+
+    //validación si el libro se ha insertado o no
+
+    if (results.affectedRows === 0) {
+      res.json({
+        success: false,
+        message: "No existe el libro que buscas, no se puede eliminar",
+      });
+      return;
+    }
+
+    //Ejecutar la consulta
+
     res.json({
       success: true,
       message: "Se ha eliminado correctamente",
     });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: `Error al eliminar el libro ${error}`,
+    });
   }
 });
-*/
