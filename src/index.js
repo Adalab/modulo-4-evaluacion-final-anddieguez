@@ -97,9 +97,27 @@ app.get("/books/:id", async (req, res) => {
 });
 
 //Insertar-añadir nuevo libro
-app.post("books", async (req, res) => {
+app.post("/books", async (req, res) => {
   const dataBook = req.body; //Objeto
   const { title, author, genre, year, synopsis } = dataBook;
 
-  let sql;
+  let sql =
+    "INSERT INTO `books` (`title`, `author`, `genre`, `year`, `synopsis`) VALUES (?, ?, ?, ?, ?);";
+
+  //conexión a la db
+  const conn = await getConnection();
+
+  //Ejecutar la consulta
+  const [results] = await conn.query(sql, [
+    title,
+    author,
+    genre,
+    year,
+    synopsis,
+  ]);
+
+  res.json({
+    success: true,
+    id: results.insertId, //id que generó MYSQL para la nueva fila
+  });
 });
